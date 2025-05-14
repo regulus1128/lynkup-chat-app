@@ -3,16 +3,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getUsers, setSelectedUser } from '../features/chatSlice';
 import SidebarSkeleton from './skeletons/SidebarSkeleton';
 import { Users } from 'lucide-react';
+import { clearUnreadMessages, socket } from '../features/socketSlice';
 
 const Sidebar = () => {
-  const { users, messages, selectedUser, isUsersLoading, isMessagesLoading } = useSelector(state => state.chat);
-  const { onlineUsers } = useSelector(state => state.socket);
+  const { users, messages, selectedUser, isUsersLoading, isMessagesLoading, typing } = useSelector(state => state.chat);
+  const { onlineUsers, typingUsers, unreadMessages } = useSelector(state => state.socket);
   const dispatch = useDispatch();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   useEffect(() => {
     dispatch(getUsers());
   }, [getUsers]);
+
+  useEffect(() => {
+    if (selectedUser) {
+      dispatch(clearUnreadMessages(selectedUser._id));
+    }
+  }, [selectedUser, dispatch]);
 
   const filteredUsers = showOnlineOnly ? users.filter(user => onlineUsers.includes(user._id)) : users;
 
@@ -24,15 +31,19 @@ const Sidebar = () => {
           <Users className='size-6'/>
           <span className="font-medium hidden lg:block">Contacts ({onlineUsers.length - 1} online)</span>
         </div>
-        {/* online filter toggle  */}
-        
+
+  
       </div>
 
       <div className='overflow-y-auto w-full py-3'>
       {filteredUsers.map((user) => (
           <button
             key={user._id}
-            onClick={() => dispatch(setSelectedUser(user))}
+            onClick={() => {
+              dispatch(setSelectedUser(user));
+              dispatch(clearUnreadMessages(user._id));
+              socket.emit("markAsRead", { senderId: user._id });
+            }}
             className={`
               w-full p-3 flex items-center gap-3
               hover:bg-base-300 transition-colors
@@ -55,9 +66,19 @@ const Sidebar = () => {
 
             {/* User info - only visible on larger screens */}
             <div className="hidden lg:block text-left min-w-0">
-              <div className="font-medium truncate">{user.fullName}</div>
+              <div className="font-medium truncate">{user.fullName}
+                {unreadMessages[user._id] > 0 && (
+                  <span className="ml-2 text-sm bg-emerald-500 text-white rounded-full px-2.5">
+                    {unreadMessages[user._id] > 9 ? '9+' : unreadMessages[user._id]}
+                  </span>
+                )}
+              </div>
               <div className="text-sm text-zinc-400">
-                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+              {typingUsers && typingUsers.includes(user._id) ? (
+              <span className="italic">Typing...</span>
+            ) : (
+              onlineUsers.includes(user._id) ? "Online" : "Offline"
+            )}
               </div>
             </div>
           </button>

@@ -18,6 +18,7 @@ const SignUpPage = () => {
     fullName: "",
     email: "",
     password: "",
+    bio: "",
   });
   const { isSigningUp } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -40,12 +41,12 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="h-screen grid lg:grid-cols-2 hanken-grotesk" >
+    <div className="min-h-screen grid lg:grid-cols-2 hanken-grotesk" >
       {/* left side  */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md">
           {/* logo  */}
-          <div className="text-center mb-8">
+          <div className="text-center mt-6">
             <div className="flex flex-col items-center gap-2 group">
               <div className="size-12 rounded-sm bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <MessageSquare className="size-6 text-primary" />
@@ -57,7 +58,7 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="mt-6">
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium mb-2">Full Name</span>
@@ -79,7 +80,7 @@ const SignUpPage = () => {
                 />
               </div>
             </div>
-            <div className="form-control">
+            <div className="form-control mt-4">
               <label className="label">
                 <span className="label-text font-medium mb-2">Email</span>
               </label>
@@ -96,7 +97,7 @@ const SignUpPage = () => {
                 />
               </div>
             </div>
-            <div className="form-control">
+            <div className="form-control mt-4">
               <label className="label">
                 <span className="label-text font-medium mb-2">Password</span>
               </label>
@@ -125,9 +126,26 @@ const SignUpPage = () => {
                 </button>
               </div>
             </div>
+            <div className="form-control mt-4">
+              <label className="label">
+                <span className="label-text font-medium mb-2">Bio (optional)</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+
+                </div>
+                <input
+                  type="text"
+                  className={`border py-3 rounded-sm w-full pl-3`}
+                  placeholder="Tell us about yourself"
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                />
+              </div>
+            </div>
             <button
               type="submit"
-              className="btn btn-primary rounded-sm w-full"
+              className="btn btn-primary rounded-sm w-full mt-5"
               disabled={isSigningUp}
             >
               {isSigningUp ? (
@@ -139,8 +157,8 @@ const SignUpPage = () => {
               )}
             </button>
           </form>
-          <div className="text-center">
-            <p className="text-base-content/60">
+          <div className="text-center mt-2">
+            <p className="text-base-content">
               Already have an account?{" "}
               <Link to="/login" className="hover:link hover:link-primary">
                 Click here to sign in.

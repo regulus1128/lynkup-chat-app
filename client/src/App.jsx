@@ -11,6 +11,7 @@ import { checkAuth } from './features/authSlice';
 import { Loader } from "lucide-react";
 import toast, { Toaster } from 'react-hot-toast';
 import { connectSocket } from './features/socketSlice';
+import AboutPage from './pages/AboutPage';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -50,6 +51,7 @@ const App = () => {
         <Route path='/login' element={!authUser ? <LoginPage/> : <Navigate to="/" />}/>
         <Route path='/settings' element={<SettingsPage/>}/>
         <Route path='/profile' element={authUser ? <ProfilePage/> : <Navigate to="/login" />}/>
+        <Route path='/about' element={authUser ? <AboutPage/> : <Navigate to="/login" />}/>
       </Routes>
       <Toaster/>
     </div>

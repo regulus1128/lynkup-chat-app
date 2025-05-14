@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Image, Send, X, Smile } from "lucide-react";
 import toast from "react-hot-toast";
 import { sendMessage } from "../features/chatSlice";
 import EmojiPicker from 'emoji-picker-react';
-import { socket } from "../features/socketSlice";
+import { sendTypingStatus, socket } from "../features/socketSlice";
 
 const MessageInput = () => {
   const dispatch = useDispatch();
@@ -13,6 +13,63 @@ const MessageInput = () => {
   const fileInputRef = useRef(null);
   const { selectedUser } = useSelector((state) => state.chat);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const typingTimeoutRef = useRef(null);
+  const [hasNotifiedTyping, setHasNotifiedTyping] = useState(false);
+
+  const isTypingRef = useRef(false);
+
+  const handleTypingStatus = (newText) => {
+    if (!selectedUser) return;
+    
+    // Only send typing event if text was empty before or contains content now
+    const wasEmpty = !text.trim();
+    const isEmpty = !newText.trim();
+    
+    if (!isEmpty && (wasEmpty || !isTypingRef.current)) {
+      // User started typing
+      sendTypingStatus(true, selectedUser._id);
+      isTypingRef.current = true;
+    } else if (isEmpty && isTypingRef.current) {
+      // User stopped typing (cleared text)
+      sendTypingStatus(false, selectedUser._id);
+      isTypingRef.current = false;
+    }
+    
+    // Clear any existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set a new timeout for stop typing
+    if (!isEmpty) {
+      typingTimeoutRef.current = setTimeout(() => {
+        if (isTypingRef.current) {
+          sendTypingStatus(false, selectedUser._id);
+          isTypingRef.current = false;
+        }
+      }, 700);
+    }
+  };
+
+  
+
+  
+
+  useEffect(() => {
+    // Clear typing status when user changes or component unmounts
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      if (isTypingRef.current && selectedUser) {
+        sendTypingStatus(false, selectedUser._id);
+        isTypingRef.current = false;
+      }
+    };
+  }, [selectedUser]);
+
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -51,13 +108,19 @@ const MessageInput = () => {
       setImagePreview(null);
       setShowEmojiPicker(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (hasNotifiedTyping) {
+        sendTypingStatus(false, selectedUser._id);
+        setHasNotifiedTyping(false);
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
 
   const onEmojiClick = (emojiData) => {
+    const newText = text + emojiData.emoji;
     setText((prev) => prev + emojiData.emoji);
+    handleTypingStatus(newText);
   };
 
   const toggleEmojiPicker = () => {
@@ -100,9 +163,12 @@ const MessageInput = () => {
             placeholder="Type a message..."
             value={text}
             onChange={(e) => {
+              const newText = e.target.value;
               setText(e.target.value);
-              handleTyping();
+              handleTypingStatus(newText);
+              
             }}
+            disabled={!selectedUser}
           />
           <input
             type="file"

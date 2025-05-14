@@ -67,7 +67,17 @@ const chatSlice = createSlice({
       },
       setTyping: (state, action) => {
         state.typing = action.payload;
-      }
+      },
+      markMessagesAsRead: (state, action) => {
+        const readerId = action.payload;
+      
+        state.messages = state.messages.map((msg) => {
+          if (msg.receiverId === readerId) {
+            return { ...msg, isRead: true };
+          }
+          return msg;
+        });
+      },
     },
     extraReducers: (builder) => {
       builder
@@ -100,6 +110,6 @@ const chatSlice = createSlice({
     },
   });
   
-  export const { setSelectedUser, addMessage, clearMessages, setTyping } = chatSlice.actions;
+  export const { setSelectedUser, addMessage, clearMessages, setTyping, markMessagesAsRead } = chatSlice.actions;
   export default chatSlice.reducer;
   

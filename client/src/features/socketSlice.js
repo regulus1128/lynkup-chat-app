@@ -1,9 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { io } from "socket.io-client";
-import { addMessage, setTyping } from "./chatSlice";
+import { addMessage, getUsers, markMessagesAsRead, setTyping } from "./chatSlice";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 let socket = null;
+const eventTimers = {};
+
+// Helper function to debounce socket events
+const debounceEvent = (eventName, callback, delay = 300) => {
+  if (eventTimers[eventName]) {
+    clearTimeout(eventTimers[eventName]);
+  }
+  eventTimers[eventName] = setTimeout(() => {
+    callback();
+    delete eventTimers[eventName];
+  }, delay);
+};
 
 export const connectSocket = createAsyncThunk(
   'socket/connectSocket',
@@ -25,29 +37,64 @@ export const connectSocket = createAsyncThunk(
     // Return a Promise that resolves after the socket connects
     return new Promise((resolve) => {
       socket.on('connect', () => {
-        console.log('✅ Connected to server with ID:', socket.id);
+        // console.log('✅ Connected to server with ID:', socket.id);
+
+        socket.on("newUserJoined", () => {
+          dispatch(getUsers());
+        });
 
         // Register all listeners here
         socket.on('getOnlineUsers', (userIds) => {
-          console.log("✅ Online users updated:", userIds);
+          // console.log("✅ Online users updated:", userIds);
           dispatch(setOnlineUsers(userIds));
         });
 
         socket.on('newMessage', (newMessage) => {
-          console.log("✅ Received newMessage:", newMessage);
+          // console.log("✅ Received newMessage:", newMessage);
           const { selectedUser } = getState().chat;
           
           // Add the message regardless of selected user
           dispatch(addMessage(newMessage));
+
+          if(!selectedUser || selectedUser._id !== newMessage.senderId) {
+            dispatch(incrementUnreadMessage(newMessage.senderId));
+            dispatch(setNewMessageFrom(newMessage.senderId));
+          }
         });
 
         socket.on('typing', ({ senderId }) => {
-          const selectedUser = getState().chat.selectedUser;
-          if (selectedUser && senderId === selectedUser._id) {
-            dispatch(setTyping(true));
-            setTimeout(() => dispatch(setTyping(false)), 3000);
-          }
+          // Debounce the typing event to prevent rapid re-renders
+          debounceEvent(`typing-${senderId}`, () => {
+            console.log("✅ User typing:", senderId);
+            dispatch(addTypingUser(senderId));
+            
+            const selectedUser = getState().chat.selectedUser;
+            if (selectedUser && senderId === selectedUser._id) {
+              dispatch(setTyping(true));
+            }
+          }, 100);
         });
+
+        socket.on('stopTyping', ({ senderId }) => {
+          // Debounce the stopTyping event
+          debounceEvent(`stopTyping-${senderId}`, () => {
+            // console.log("✅ User stopped typing:", senderId);
+            
+            // Remove from global typing users list
+            dispatch(removeTypingUser(senderId));
+            
+            // If this is the selected user, also update the chat typing indicator
+            const selectedUser = getState().chat.selectedUser;
+            if (selectedUser && senderId === selectedUser._id) {
+              dispatch(setTyping(false));
+            }
+          }, 100);
+        });
+
+        socket.on("messagesRead", ({ readerId }) => {
+          dispatch(markMessagesAsRead(readerId)); 
+        });
+        
 
         socket.onAny((event, ...args) => {
           console.log(`🔔 Event received: ${event}`, args);
@@ -75,33 +122,80 @@ export const connectSocket = createAsyncThunk(
     }
   );
 
-  // export const subscribeToMessages = createAsyncThunk(
-  //   'socket/subscribeToMessages',
-  //   async (_, { getState, dispatch }) => {
-  //     return; 
-  //   }
-  // );
+  const typingTimeouts = {};
+
+export const sendTypingStatus = (isTyping, receiverId) => {
+  if (!socket || !socket.connected || !receiverId) return;
   
-  // export const unsubscribeFromMessages = createAsyncThunk(
-  //   'socket/unsubscribeFromMessages',
-  //   async () => {
-  //     if (socket) {
-  //       socket.off("newMessage");
-  //     }
-  //   }
-  // );
+  const event = isTyping ? 'typing' : 'stopTyping';
+  const timeoutKey = `${event}-${receiverId}`;
+  
+  // Clear existing timeout to debounce
+  if (typingTimeouts[timeoutKey]) {
+    clearTimeout(typingTimeouts[timeoutKey]);
+  }
+  
+  // Set a new timeout
+  typingTimeouts[timeoutKey] = setTimeout(() => {
+    socket.emit(event, { receiverId });
+    delete typingTimeouts[timeoutKey];
+  }, isTyping ? 100 : 300); // Faster for typing, slower for stopTyping
+};
+
+
+export const clearUnreadMessages = createAsyncThunk(
+  'socket/clearUnreadMessages',
+  async (userId, { dispatch }) => {
+    dispatch(clearUserUnreadMessages(userId));
+    return userId;
+  }
+);
+
   
   const socketSlice = createSlice({
     name: 'socket',
     initialState: {
       socketId: null,
       onlineUsers: [],
+      typingUsers: [],
+      unreadMessages: {},
+      newMessageFrom: null,
+
       
     },
     reducers: {
       setOnlineUsers: (state, action) => {
         state.onlineUsers = action.payload;
       },
+      setSocket: (state, action) => {
+        state.socketId = action.payload;
+      },
+      setNewMessageFrom: (state, action) => {
+        state.newMessageFrom = action.payload;
+      },
+      addTypingUser: (state, action) => {
+        if (!state.typingUsers.includes(action.payload)) {
+          state.typingUsers.push(action.payload);
+        }
+      },
+      removeTypingUser: (state, action) => {
+        state.typingUsers = state.typingUsers.filter(userId => userId !== action.payload);
+      },
+      clearUserUnreadMessages: (state, action) => {
+        const userId = action.payload;
+        if (state.unreadMessages[userId]) {
+          state.unreadMessages[userId] = 0;
+        }
+      },
+      incrementUnreadMessage: (state, action) => {
+        const userId = action.payload;
+        if (!state.unreadMessages[userId]) {
+          state.unreadMessages[userId] = 1;
+        } else {
+          state.unreadMessages[userId] += 1;
+        }
+      },
+
     },
     extraReducers: (builder) => {
       builder
@@ -115,6 +209,6 @@ export const connectSocket = createAsyncThunk(
     },
   });
   
-  export const { setOnlineUsers } = socketSlice.actions;
+  export const { setOnlineUsers, setSocket, setNewMessageFrom, addTypingUser, removeTypingUser, clearUserUnreadMessages, incrementUnreadMessage } = socketSlice.actions;
   export { socket };
   export default socketSlice.reducer;

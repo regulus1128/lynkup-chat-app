@@ -93,7 +93,7 @@ export const logout =  async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const { profilePic, fullName, email } = req.body;
+        const { profilePic, fullName, email, bio } = req.body;
         const userId = req.user?._id;
 
         if (!userId) {
@@ -113,6 +113,7 @@ export const updateProfile = async (req, res) => {
         const updatedFields = {
             fullName,
             email,
+            bio,
         };
 
         if (profilePicUrl) {

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Camera, Mail, User } from "lucide-react";
+import { Camera, Mail, User, IdCard } from "lucide-react";
 import { useDispatch, useSelector } from 'react-redux';
 import { updateProfile } from '../features/authSlice';
-import axios from 'axios';
-import { axiosInstance } from '../lib/axios';
+
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile } = useSelector((state) => state.auth);
@@ -12,11 +11,13 @@ const ProfilePage = () => {
   const [selectedImg, setSelectedImg] = useState(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
 
   useEffect(() => {
     if (authUser) {
       setFullName(authUser.fullName);
       setEmail(authUser.email);
+      setBio(authUser.bio);
       setSelectedImg(authUser.profilePic);
     }
   }, [authUser]);
@@ -39,6 +40,7 @@ const ProfilePage = () => {
     dispatch(updateProfile({
       fullName,
       email,
+      bio,
       profilePic: selectedImg || authUser?.profilePic, // Ensure image is preserved
     }));
   };
@@ -113,6 +115,21 @@ const ProfilePage = () => {
               />
             </div>
 
+            <div className="space-y-1.5">
+              <label className="text-sm text-zinc-400 flex items-center gap-2 mb-2">
+                {/* <Mail className="w-4 h-4" /> */}
+                <IdCard className='w-4 h-4'/>
+                Bio
+              </label>
+              <input
+                type="email"
+                className="border py-3 rounded-sm w-full pl-3"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                disabled={isUpdatingProfile}
+              />
+            </div>
+
             <button
               className="btn btn-primary w-full"
               onClick={handleUpdate}
@@ -123,17 +140,14 @@ const ProfilePage = () => {
           </div>
 
           {/* Info Section */}
-          <div className="mt-6 bg-base-300 rounded-xl p-6">
-            <h2 className="text-lg font-medium mb-4">Account Information</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between py-2 border-b border-zinc-700">
+          <div className=" bg-base-300 rounded-xl p-6">
+            <div className=" text-sm">
+              <div className="flex items-center justify-between py-2">
                 <span>Member Since</span>
                 <span>{authUser.createdAt?.split("T")[0]}</span>
               </div>
-              <div className="flex items-center justify-between py-2">
-                <span>Account Status</span>
-                <span className="text-green-500">Active</span>
-              </div>
+              <button className="btn btn-secondary w-full mt-4">Delete Account</button>
+              
             </div>
           </div>
         </div>
