@@ -1,6 +1,6 @@
 # LYNKUP Chat App
 
-LYNKUP is a full-stack real-time chat application built with modern technologies like **React**, **Redux Toolkit**, **Socket.IO**, **MongoDB**, and **Node.js**.
+LYNKUP is a full-stack real-time chat application built with modern technologies like **React**, **Redux Toolkit**, **Socket.IO**, **MongoDB**, **Node.js** and **Express.js**.
 
 ---
 
