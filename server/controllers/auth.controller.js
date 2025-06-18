@@ -99,11 +99,7 @@ export const updateProfile = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-
-        // if (!fullName || !email) {
-        //     return res.status(400).json({ message: 'Full name and email are required' });
-        // }
-
+        
         let profilePicUrl;
         if (profilePic) {
             const uploadResponse = await cloudinary.uploader.upload(profilePic);

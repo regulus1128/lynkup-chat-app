@@ -3,13 +3,16 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "user",
         required: true,
     },
     receiverId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+        ref: "user",
+    },
+    groupId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "group",
     },
     text: {
         type: String,
@@ -18,6 +21,10 @@ const messageSchema = new mongoose.Schema({
         type: String,
     },
     isRead: {
+        type: Boolean,
+        default: false,
+    },
+    isSystem: {
         type: Boolean,
         default: false,
     },

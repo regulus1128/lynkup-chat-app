@@ -20,54 +20,59 @@ const MessageInput = () => {
 
   const handleTypingStatus = (newText) => {
     if (!selectedUser) return;
-    
-    // Only send typing event if text was empty before or contains content now
+  
+    const isGroup = selectedUser.members;
     const wasEmpty = !text.trim();
     const isEmpty = !newText.trim();
-    
+  
+    const typingTarget = isGroup
+      ? { groupId: selectedUser._id }
+      : { receiverId: selectedUser._id };
+  
     if (!isEmpty && (wasEmpty || !isTypingRef.current)) {
-      // User started typing
-      sendTypingStatus(true, selectedUser._id);
+      sendTypingStatus(true, typingTarget);
       isTypingRef.current = true;
     } else if (isEmpty && isTypingRef.current) {
-      // User stopped typing (cleared text)
-      sendTypingStatus(false, selectedUser._id);
+      sendTypingStatus(false, typingTarget);
       isTypingRef.current = false;
     }
-    
-    // Clear any existing timeout
+  
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
-    // Set a new timeout for stop typing
+  
     if (!isEmpty) {
       typingTimeoutRef.current = setTimeout(() => {
         if (isTypingRef.current) {
-          sendTypingStatus(false, selectedUser._id);
+          sendTypingStatus(false, typingTarget);
           isTypingRef.current = false;
         }
       }, 700);
     }
   };
+  
 
   
 
   
 
   useEffect(() => {
-    // Clear typing status when user changes or component unmounts
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
+  
       if (isTypingRef.current && selectedUser) {
-        sendTypingStatus(false, selectedUser._id);
+        const isGroup = selectedUser.members;
+        sendTypingStatus(false, {
+          receiverId: isGroup ? null : selectedUser._id,
+          groupId: isGroup ? selectedUser._id : null,
+        });
         isTypingRef.current = false;
       }
     };
   }, [selectedUser]);
+  
 
   
 
@@ -93,29 +98,38 @@ const MessageInput = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
-
+  
+    const isGroup = selectedUser?.members;
+  
     try {
-        await dispatch(sendMessage({
-            userId: selectedUser._id,
-            messageData: {
-              text: text.trim(),
-              image: imagePreview,
-            }
-          }));
-
+      await dispatch(
+        sendMessage({
+          userId: isGroup ? null : selectedUser._id,
+          messageData: {
+            text: text.trim(),
+            image: imagePreview,
+            groupId: isGroup ? selectedUser._id : null,
+          },
+        })
+      );
+  
       // Clear form
       setText("");
       setImagePreview(null);
       setShowEmojiPicker(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (hasNotifiedTyping) {
-        sendTypingStatus(false, selectedUser._id);
+        sendTypingStatus(false, {
+          receiverId: isGroup ? null : selectedUser._id,
+          groupId: isGroup ? selectedUser._id : null,
+        });
         setHasNotifiedTyping(false);
       }
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
+  
 
   const onEmojiClick = (emojiData) => {
     const newText = text + emojiData.emoji;

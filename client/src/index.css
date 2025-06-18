@@ -4,6 +4,7 @@
 @plugin "daisyui" {
   themes: all;
 }
+@plugin 'tailwind-scrollbar';
 
 .hind-madurai-light {
   font-family: "Hind Madurai", sans-serif;
@@ -53,6 +54,15 @@
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out forwards;
+}
+
+body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 

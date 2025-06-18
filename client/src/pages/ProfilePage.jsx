@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateProfile } from '../features/authSlice';
 
 
+
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const ProfilePage = () => {
       <div className="max-w-2xl mx-auto p-4 py-8">
         <div className="bg-base-300 rounded-xl p-6 space-y-8">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold ">Profile</h1>
+            <h1 className="text-2xl font-semibold ">PROFILE</h1>
           </div>
 
           {/* Avatar Upload */}
@@ -59,7 +60,7 @@ const ProfilePage = () => {
               <img
                 src={selectedImg || "/avatar.png"}
                 alt="Profile"
-                className="size-32 rounded-full object-cover border-4"
+                className="size-32 rounded-full object-cover border-2"
               />
               <label
                 htmlFor="avatar-upload"
@@ -80,7 +81,7 @@ const ProfilePage = () => {
                 />
               </label>
             </div>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm">
               {isUpdatingProfile ? "Uploading..." : "Click the camera icon to update your photo"}
             </p>
           </div>
@@ -88,7 +89,7 @@ const ProfilePage = () => {
           {/* Editable Inputs */}
           <div className="space-y-6">
             <div className="space-y-1.5">
-              <label className="text-sm text-zinc-400 flex items-center gap-2 mb-2">
+              <label className="text-sm flex items-center gap-2 mb-2">
                 <User className="w-4 h-4" />
                 Full Name
               </label>
@@ -102,7 +103,7 @@ const ProfilePage = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm text-zinc-400 flex items-center gap-2 mb-2">
+              <label className="text-sm flex items-center gap-2 mb-2">
                 <Mail className="w-4 h-4" />
                 Email Address
               </label>
@@ -116,7 +117,7 @@ const ProfilePage = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm text-zinc-400 flex items-center gap-2 mb-2">
+              <label className="text-sm flex items-center gap-2 mb-2">
                 {/* <Mail className="w-4 h-4" /> */}
                 <IdCard className='w-4 h-4'/>
                 Bio
@@ -131,7 +132,7 @@ const ProfilePage = () => {
             </div>
 
             <button
-              className="btn btn-primary w-full"
+              className="btn btn-primary rounded-full w-full"
               onClick={handleUpdate}
               disabled={isUpdatingProfile}
             >
@@ -144,9 +145,14 @@ const ProfilePage = () => {
             <div className=" text-sm">
               <div className="flex items-center justify-between py-2">
                 <span>Member Since</span>
-                <span>{authUser.createdAt?.split("T")[0]}</span>
+                <span>{new Date(authUser.createdAt).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })}</span>
+                
               </div>
-              <button className="btn btn-secondary w-full mt-4">Delete Account</button>
+              {/* <button className="btn btn-secondary w-full mt-4">Delete Account</button> */}
               
             </div>
           </div>

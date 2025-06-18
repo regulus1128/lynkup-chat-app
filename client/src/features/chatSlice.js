@@ -16,27 +16,55 @@ export const getUsers = createAsyncThunk(
 );
 
 export const getMessages = createAsyncThunk(
-    "chat/getMessages",
-    async (userId, { rejectWithValue }) => {
-      try {
-        const res = await axiosInstance.get(`/messages/${userId}`);
-        return res.data;
-      } catch (error) {
-        toast.error(error.response.data.message);
-        return rejectWithValue(error.response.data.message);
-      }
+  "chat/getMessages",
+  async (target, { rejectWithValue }) => {
+    const { id, isGroup } = target;
+    const url = isGroup ? `/group/messages/${id}` : `/messages/${id}`;
+    try {
+      const res = await axiosInstance.get(url);
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error fetching messages");
+      return rejectWithValue(error.response?.data?.message);
     }
+  }
 );
 
 export const sendMessage = createAsyncThunk(
   "chat/sendMessage",
   async ({ userId, messageData }, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post(`/messages/send/${userId}`, messageData);
+      const res = messageData.groupId 
+      ? await axiosInstance.post(`/group/send-group/${messageData.groupId}`, messageData) 
+      : await axiosInstance.post(`/messages/send/${userId}`, messageData);
       return res.data;
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send message");
       return rejectWithValue(error.response?.data?.message);
+    }
+  }
+);
+
+export const getGroupDetails = createAsyncThunk(
+  "chat/getGroupDetails",
+  async (groupId, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/group/group/${groupId}`);
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch group");
+    }
+  }
+);
+
+export const getAllGroups = createAsyncThunk(
+  "chat/getAllGroups",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/group/groups`);
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch groups");
     }
   }
 );
@@ -46,11 +74,15 @@ const chatSlice = createSlice({
     initialState: {
       messages: [],
       users: [],
+      groups: [],
       selectedUser: null,
       isUsersLoading: false,
       isMessagesLoading: false,
       error: null,
-      typing: false,
+      typing: {
+        targetId: null,
+        isTyping: false,
+      },
     },
     reducers: {
       setSelectedUser: (state, action) => {
@@ -66,18 +98,27 @@ const chatSlice = createSlice({
         state.messages = [];
       },
       setTyping: (state, action) => {
-        state.typing = action.payload;
+        state.typing = {
+          targetId: action.payload.targetId,
+          isTyping: action.payload.isTyping,
+        };
       },
       markMessagesAsRead: (state, action) => {
-        const readerId = action.payload;
+        const { readerId, groupId } = action.payload;
       
         state.messages = state.messages.map((msg) => {
-          if (msg.receiverId === readerId) {
-            return { ...msg, isRead: true };
+          const senderId = typeof msg.senderId === "object" ? msg.senderId._id : msg.senderId;
+          
+          if (groupId) {
+            return msg.groupId === groupId && senderId === readerId
+              ? { ...msg, isRead: true }
+              : msg;
+          } else {
+            return msg.receiverId === readerId ? { ...msg, isRead: true } : msg;
           }
-          return msg;
         });
-      },
+      }
+      
     },
     extraReducers: (builder) => {
       builder
@@ -106,7 +147,13 @@ const chatSlice = createSlice({
         })
         .addCase(sendMessage.fulfilled, (state, action) => {
           state.messages.push(action.payload); // add new message to the array
-        });
+        })
+        .addCase(getGroupDetails.fulfilled, (state, action) => {
+          state.selectedUser = action.payload;
+        })
+        .addCase(getAllGroups.fulfilled, (state, action) => {
+          state.groups = action.payload;
+        })
     },
   });
   
