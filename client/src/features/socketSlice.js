@@ -21,7 +21,7 @@ export const connectSocket = createAsyncThunk(
   'socket/connectSocket',
   async (_, { getState, dispatch }) => {
     const { authUser } = getState().auth;
-    if (!authUser) return null;
+    if (!authUser || !authUser._id) return null;
     
     // Disconnect existing socket if there is one
     if (socket && socket.connected) {

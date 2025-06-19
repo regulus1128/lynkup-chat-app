@@ -27,6 +27,12 @@ export function getReceiverSocketId(userId) {
 io.on("connection", async (socket) => {
     const userId = socket.handshake.query.userId;
 
+    if (!userId) {
+      console.warn("🚫 No userId in socket query!");
+      socket.disconnect(true);
+      return;
+    }
+
     try {
       const userGroups = await Group.find({ members: userId }, "_id");
       userGroups.forEach(group => {
