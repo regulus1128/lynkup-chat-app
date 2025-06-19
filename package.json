@@ -1,0 +1,14 @@
+{
+  "name": "chat-app",
+  "version": "1.0.0",
+  "description": "LYNKUP is a full-stack real-time chat application built with modern technologies like **React**, **Redux Toolkit**, **Socket.IO**, **MongoDB**, **Node.js** and **Express.js**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "",
+    "build": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

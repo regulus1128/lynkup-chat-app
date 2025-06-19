@@ -45,5 +45,5 @@ LYNKUP is a full-stack real-time chat application built with modern technologies
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/your-chat-app.git
-cd your-chat-app
+git clone https://github.com/regulus1128/lynkup-chat-app.git
+cd lynkup-chat-app
