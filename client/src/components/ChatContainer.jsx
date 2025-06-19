@@ -63,7 +63,8 @@ const ChatContainer = () => {
     );
   }
 
-  const filteredMessages = messages.filter((msg) => {
+  const filteredMessages =  Array.isArray(messages)
+  ? messages.filter((msg) => {
     if (isGroup) {
       return msg.groupId === selectedUser._id;
     }
@@ -74,7 +75,7 @@ const ChatContainer = () => {
       (senderId === authUser._id && receiverId === selectedUser._id) ||
       (senderId === selectedUser._id && receiverId === authUser._id)
     );
-  });
+  }) : [];
 
   // Helper function to get sender info for group messages
   const getSenderInfo = (message) => {
