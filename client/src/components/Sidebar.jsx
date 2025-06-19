@@ -39,9 +39,12 @@ const Sidebar = () => {
     }
   }, [selectedUser, dispatch]);
 
-  const filteredUsers = showOnlineOnly
-    ? users.filter((user) => onlineUsers.includes(user._id) && user.email !== SYSTEM_EMAIL)
-    : users.filter((user) => user.email !== SYSTEM_EMAIL);
+  const filteredUsers = Array.isArray(users)
+  ? (showOnlineOnly
+      ? users.filter((user) => onlineUsers.includes(user._id) && user.email !== SYSTEM_EMAIL)
+      : users.filter((user) => user.email !== SYSTEM_EMAIL))
+  : [];
+
 
 
   useEffect(() => {

@@ -154,7 +154,7 @@ const GroupPage = ({ onClose }) => {
                scrollbar-active:scrollbar-thumb-primary"
                 style={{ maxHeight: "200px" }} // adjust as needed
               >
-                {users
+                {Array.isArray(users) && users
                 .filter((user) => user._id !== SYSTEM_ID)
                 .map((user) => (
                   <div key={user._id} className="flex items-center gap-2 mt-3">
