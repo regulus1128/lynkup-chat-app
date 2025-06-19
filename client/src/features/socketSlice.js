@@ -37,7 +37,7 @@ export const connectSocket = createAsyncThunk(
     // Return a Promise that resolves after the socket connects
     return new Promise((resolve) => {
       socket.on('connect', () => {
-        // console.log('✅ Connected to server with ID:', socket.id);
+        console.log('✅ Socket connected with ID:', socket.id, 'User:', authUser._id);
 
         socket.on("newUserJoined", () => {
           dispatch(getUsers());
