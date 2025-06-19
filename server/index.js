@@ -27,12 +27,16 @@ app.use("/api/auth", authRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/group", groupRouter);
 
-if(process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/dist')));
-    app.get(/(.*)/, (req, res) => {
-        res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-    });
-}
+// if(process.env.NODE_ENV === 'production') {
+//     app.use(express.static(path.join(__dirname, '../client/dist')));
+//     app.get(/(.*)/, (req, res) => {
+//         res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+//     });
+// }
+
+app.get('/', (req, res) => {
+    res.send('Hello');
+});
 
 server.listen(PORT, () => {
     console.log(`Server running at PORT ${PORT}`);
