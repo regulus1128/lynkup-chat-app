@@ -38,7 +38,23 @@ app.get('/', (req, res) => {
     res.send('Hello');
 });
 
-server.listen(PORT, () => {
-    console.log(`Server running at PORT ${PORT}`);
-    connectDB();
-});
+const startServer = async () => {
+    try {
+      await connectDB(); // ✅ Wait for DB to connect first
+  
+      server.listen(PORT, () => {
+        console.log(`Server running at PORT ${PORT}`);
+      });
+    } catch (err) {
+      console.error("❌ Failed to connect to DB:", err.message);
+      process.exit(1); // stop the server if DB connection fails
+    }
+  };
+  
+  startServer(); // ⬅️ Call the async init function
+  
+
+// server.listen(PORT, () => {
+//     console.log(`Server running at PORT ${PORT}`);
+//     connectDB();
+// });
