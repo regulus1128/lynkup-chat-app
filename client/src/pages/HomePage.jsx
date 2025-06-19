@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import NoChatSelected from '../components/NoChatSelected';
 import ChatContainer from '../components/ChatContainer';
 import Sidebar from '../components/Sidebar';
+import { Menu } from "lucide-react";
 
 const HomePage = () => {
   const dispatch = useDispatch();

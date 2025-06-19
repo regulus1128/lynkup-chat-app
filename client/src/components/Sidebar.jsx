@@ -29,7 +29,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     dispatch(getUsers());
-  }, [getUsers]);
+  }, []);
 
   // console.log(authUser);
 
@@ -146,7 +146,7 @@ const Sidebar = () => {
         {filteredUsers.length === 0 && (
           <div className="text-center text-gray-400 py-4">No online users</div>
         )}
-        {/* group chat feature (implement later)  */}
+        
       </div>
     </aside>
   );
