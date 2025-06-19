@@ -101,7 +101,7 @@ const ChatContainer = () => {
               No messages yet. Start a conversation!
             </div>
           )}
-          {filteredMessages.map((message, index) => {
+          {Array.isArray(filteredMessages) && filteredMessages.map((message, index) => {
             const isLastMessage = index === filteredMessages.length - 1;
             const senderId = typeof message.senderId === 'object' ? message.senderId._id : message.senderId;
             const isSelf = senderId === authUser._id;

@@ -52,10 +52,6 @@ const MessageInput = () => {
   };
   
 
-  
-
-  
-
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {

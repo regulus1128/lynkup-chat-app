@@ -85,7 +85,7 @@ const AddMembersPage = ({ onClose }) => {
                  scrollbar-active:scrollbar-thumb-primary"
                   style={{ maxHeight: "200px" }} // adjust as needed
                 >
-                  {availableUsers
+                  {Array.isArray(availableUsers) && availableUsers
                   .filter((user) => user._id !== SYSTEM_ID)
                   .map((user) => (
                     <div key={user._id} className="flex items-center gap-2 mt-3">

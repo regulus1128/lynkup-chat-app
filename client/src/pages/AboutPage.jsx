@@ -142,7 +142,7 @@ const AboutPage = ({ onClose }) => {
             )}
 
             {/* Members */}
-            {selectedUser.members
+            {Array.isArray(selectedUser) && selectedUser.members
               .filter((m) => m._id !== selectedUser.createdBy?._id)
               .map((member) => (
                 <div key={member._id} className="flex items-center gap-3">

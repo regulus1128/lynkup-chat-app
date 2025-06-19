@@ -59,7 +59,7 @@ const Sidebar = () => {
       <div className="overflow-y-auto w-full py-3 
                scrollbar-hide lg:scrollbar-default scrollbar-thumb-base-300 scrollbar-track-base-100 scrollbar-thin flex flex-col gap-2 h-full px-3 lg:px-0">
                 
-        {filteredUsers.map((user) => (
+        {Array.isArray(filteredUsers) && filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => {
@@ -116,7 +116,7 @@ const Sidebar = () => {
           </button>
         ))}
 
-        {groups.map((group) => (
+        {Array.isArray(groups) && groups.map((group) => (
           <button
             key={group._id}
             onClick={() => {

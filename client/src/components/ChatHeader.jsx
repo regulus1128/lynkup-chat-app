@@ -40,7 +40,7 @@ const ChatHeader = ({ onOpenAbout }) => {
             </h3>
             <p className="text-sm">
             
-  {selectedUser?.members ? (
+  {Array.isArray(selectedUser) && selectedUser?.members ? (
     isTyping ? (
       <span className="italic">Someone is typing...</span>
     ) : (
@@ -65,7 +65,7 @@ const ChatHeader = ({ onOpenAbout }) => {
 
           return (
             <>
-              {displayNames.map((name, index) => (
+              {Array.isArray(displayNames) && displayNames.map((name, index) => (
                 <span key={index}>
                   {name}
                   {index < displayNames.length - 1 && ", "}
