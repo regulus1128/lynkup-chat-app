@@ -9,7 +9,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: ["https://lynkup-zeta.vercel.app"],
+        origin: ["https://lynkup-chat.vercel.app"],
         credentials: true,
     },
 });
