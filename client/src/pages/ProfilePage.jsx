@@ -14,6 +14,8 @@ const ProfilePage = () => {
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
 
+  console.log("authuser:", authUser);
+
   useEffect(() => {
     if (authUser) {
       setFullName(authUser.fullName);

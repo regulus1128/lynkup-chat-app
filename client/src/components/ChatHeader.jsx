@@ -40,7 +40,7 @@ const ChatHeader = ({ onOpenAbout }) => {
             </h3>
             <p className="text-sm">
             
-  {Array.isArray(selectedUser) && selectedUser?.members ? (
+  {Array.isArray(selectedUser.members) && selectedUser?.members ? (
     isTyping ? (
       <span className="italic">Someone is typing...</span>
     ) : (
